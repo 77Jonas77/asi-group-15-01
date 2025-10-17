@@ -1,19 +1,13 @@
 name: asi-ml
 channels:
-  - conda-forge
   - defaults
 dependencies:
+  - scikit-learn
+  - ipykernel
+  - matplotlib
+  - pandas
   - python=3.11
   - jupyterlab
-  - ipykernel
   - numpy
-  - pandas
-  - scikit-learn
-  - matplotlib
   - pip
-  - pip:
-      - pre-commit
-      - ruff
-      - black
-      - pytest
-      - wandb
+prefix: /Users/jonaszsojka/miniconda3/envs/asi-ml
