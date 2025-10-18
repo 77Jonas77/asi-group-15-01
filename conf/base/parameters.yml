@@ -1,0 +1,14 @@
+data:
+  raw_csv: "data/01_raw/data.csv"
+
+split:
+  test_size: 0.3
+  random_state: 17
+  stratify: true
+
+model:
+  kind: random_forest
+  n_estimators: 200
+  max_depth: null
+  random_state: 17
+  n_jobs: -1

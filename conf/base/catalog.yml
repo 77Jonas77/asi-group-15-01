@@ -2,3 +2,35 @@
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+
+raw_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/sample.csv
+
+cleaned_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_interim/clean.parquet
+
+X_train:
+  type: pandas.ParquetDataset
+  filepath: data/03_processed/X_train.parquet
+
+X_test:
+  type: pandas.ParquetDataset
+  filepath: data/03_processed/X_test.parquet
+
+y_train:
+  type: pandas.ParquetDataset
+  filepath: data/03_processed/y_train.parquet
+
+y_test:
+  type: pandas.ParquetDataset
+  filepath: data/03_processed/y_test.parquet
+
+baseline_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/model_baseline.pkl
+
+metrics_baseline:
+  type: tracking.MetricsDataSet
+  filepath: data/09_tracking/metrics_baseline.json
