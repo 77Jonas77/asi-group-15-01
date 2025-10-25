@@ -1,17 +1,20 @@
+
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split as sk_train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import average_precision_score, f1_score, roc_auc_score
 
+def load_raw(raw_csv: str) -> pd.DataFrame:
+    """Load raw data from a CSV file.
 
-def load_raw() -> pd.DataFrame:
-    """Load raw data from as CSV file.
+    Args:
+        raw_csv (str): Path to the raw CSV file.
 
     Returns:
         pd.DataFrame: Raw data.
     """
-    return pd.read_csv("data/01_raw/data.csv", skipinitialspace=True)
+    return pd.read_csv(raw_csv, skipinitialspace=True)
 
 
 def basic_clean(df: pd.DataFrame) -> pd.DataFrame:
@@ -62,41 +65,43 @@ def basic_clean(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def train_test_split(
-    df: pd.DataFrame,
-) -> list[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    """Split the cleaned data into training and testing sets.
-
-    Returns:
-        list[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]: X_train, X_test, y_train, y_test
-    """
+    df: pd.DataFrame, split_params: dict
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    """Split the cleaned data into training and testing sets using parameters from config."""
     y = df["income_encoded"]
     X = df.drop(columns=["income_encoded"])
 
     X_train, X_test, y_train, y_test = sk_train_test_split(
-        X, y, test_size=0.3, random_state=17, stratify=y
-    )
-    return [X_train, X_test, y_train, y_test]
-
-
-def train_baseline(X_train: pd.DataFrame, y_train: pd.Series):
-    """Train a baseline model that predicts the majority class.
-
-    Returns:
-        float: Baseline accuracy.
-    """
-    rf_model = RandomForestClassifier(
-        n_estimators=200,  # number of trees in the forest
-        max_depth=None,
-        random_state=17,  # to keep results consistent
-        n_jobs=-1,  # use all available cores
+        X,
+        y,
+        test_size=split_params["test_size"],
+        random_state=split_params["random_state"],
+        stratify=y if split_params.get("stratify", True) else None,
     )
 
-    fitted_model = rf_model.fit(X_train, y_train)
+    y_train = y_train.to_frame()
+    y_test = y_test.to_frame()
 
-    return fitted_model
+    return X_train, X_test, y_train, y_test
 
 
-def evaluate(model, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
+def train_baseline(X_train: pd.DataFrame, y_train: pd.Series, model_params: dict):
+    """Train a model with parameters from config."""
+    if model_params["kind"] == "random_forest":
+        model = RandomForestClassifier(
+            n_estimators=model_params.get("n_estimators", 100),
+            max_depth=model_params.get("max_depth"),
+            random_state=model_params.get("random_state", 17),
+            n_jobs=model_params.get("n_jobs", -1),
+        )
+    else:
+        raise ValueError(f"Unknown model kind: {model_params['kind']}")
+
+    model.fit(X_train, y_train)
+    return model
+
+
+def evaluate(model, X_test: pd.DataFrame, y_test: pd.DataFrame) -> pd.DataFrame:
     """Evaluate the model on the test set.
 
     Returns:
@@ -105,12 +110,11 @@ def evaluate(model, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
     y_proba = model.predict_proba(X_test)[:, 1]  # probability of the positive class
     y_pred = model.predict(X_test)
 
-    avg_precision = average_precision_score(y_test, y_proba)
-    f1 = f1_score(y_test, y_pred)
-    roc_auc = roc_auc_score(y_test, y_proba)
-
-    return {
-        "average_precision": avg_precision,
-        "f1_score": f1,
-        "roc_auc": roc_auc,
+    metrics = {
+        "average_precision": average_precision_score(y_test, y_proba),
+        "f1_score": f1_score(y_test, y_pred),
+        "roc_auc": roc_auc_score(y_test, y_proba),
     }
+
+    metrics_df = pd.DataFrame([metrics])
+    return metrics_df
