@@ -19,23 +19,23 @@ Jako nasza metryka oceny modelu wybraliśmy **AP** (Average Precision). Decyzja 
 Rozważaliśmy również metrykę AUC-ROC, aczkolwiek jak ustaliliśmy, jej wynik może być łatwo zawyżany przez przewagę w ilości wierszy z klasą negatywną (<$50k).
 
 ## Wandb
-Uruchomienie projektu i śledzenie eksperymentów (Kedro + Weights & Biases)
+Panel projektu w W&B dostępny jest pod adresem:
+https://wandb.ai/s28044-polish-japanese-academy-of-information-technology/asi-group-15-01?nw=nwusers28044
+
+## Kedro Quickstart
 
 Cały pipeline (ładowanie danych, preprocessing, podział na zbiory, trening modelu, ewaluacja, logowanie metryk i modelu) uruchamia się poleceniem:
 
 kedro run
 
 Po wykonaniu pipeline dane i model zapisują się lokalnie w strukturze:
--dane surowe: data/01_raw/
--dane po czyszczeniu: data/02_interim/
--dane przygotowane do uczenia modelu: data/03_processed/
--wytrenowany model: data/06_models/model_baseline.pkl
 
-Projekt automatycznie loguje wyniki eksperymentów do Weights & Biases (W&B), w tym:
--metryki modelu: ROC AUC, F1 score, Average Precision
--hiperparametry modelu z pliku conf/base/parameters_data_science.yml
--artefakt modelu: model_baseline
--parametry podziału zbioru treningowego i testowego
+- dane surowe: data/01_raw/
+- dane po czyszczeniu: data/02_interim/
+- dane przygotowane do uczenia modelu: data/03_processed/
+- wytrenowany model: data/06_models/model_baseline.pkl
+- metryki:data/09_tracking/metrics_baseline.json
 
-Panel projektu w W&B dostępny jest pod adresem:
-https://wandb.ai/s28044-polish-japanese-academy-of-information-technology/asi-group-15-01?nw=nwusers28044
+
+![Pipline Screens](images/kedro-pipeline.png)
+
