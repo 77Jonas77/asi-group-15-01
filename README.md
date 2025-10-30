@@ -39,3 +39,8 @@ Projekt automatycznie loguje wyniki eksperymentów do Weights & Biases (W&B), w 
 
 Panel projektu w W&B dostępny jest pod adresem:
 https://wandb.ai/s28044-polish-japanese-academy-of-information-technology/asi-group-15-01?nw=nwusers28044
+
+## Kedro Quickstart
+
+![Pipline Screens](images/ASI_02_01.png)
+![Pipline Screens](images/ASI_02_02.png)
