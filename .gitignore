@@ -193,3 +193,6 @@ mlruns/*
 
 # Visual Studio Code
 .vs
+
+# W&B
+wandb/

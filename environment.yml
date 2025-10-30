@@ -23,6 +23,5 @@ dependencies:
       - great-expectations
       - notebook
       - kedro-datasets
-      - kedro-datasets[tracking]
 
   - pyyaml

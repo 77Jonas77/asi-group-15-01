@@ -36,13 +36,13 @@ def create_pipeline(**kwargs) -> Pipeline:
             Node(
                 func=train_baseline,
                 inputs=["X_train", "y_train", "params:model"],
-                outputs="baseline_model",
+                outputs="model_baseline",
                 name="train_baseline",
             ),
             Node(
                 func=evaluate,
-                inputs=["baseline_model", "X_test", "y_test"],
-                outputs="evaluation_metrics",
+                inputs=["model_baseline", "X_test", "y_test"],
+                outputs="metrics_baseline",
                 name="evaluate",
             ),
         ]
