@@ -27,10 +27,10 @@ y_test:
   type: pandas.ParquetDataset
   filepath: data/03_processed/y_test.parquet
 
-baseline_model:
+model_baseline:
   type: pickle.PickleDataset
   filepath: data/06_models/model_baseline.pkl
 
 metrics_baseline:
-  type: tracking.MetricsDataSet
+  type: json.JSONDataset
   filepath: data/09_tracking/metrics_baseline.json

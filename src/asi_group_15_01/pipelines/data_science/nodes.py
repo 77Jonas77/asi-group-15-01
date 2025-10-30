@@ -92,13 +92,6 @@ def train_test_split(
 def train_baseline(X_train: pd.DataFrame, y_train: pd.Series, model_params: dict):
     """Train a model with parameters from config."""
 
-    run = wandb.init(
-        project="asi-group-15-01",
-        job_type="train",
-        config=model_params,
-        reinit=True,
-    )
-
     if model_params["kind"] == "random_forest":
         model = RandomForestClassifier(
             n_estimators=model_params.get("n_estimators", 100),
@@ -111,14 +104,12 @@ def train_baseline(X_train: pd.DataFrame, y_train: pd.Series, model_params: dict
 
     model.fit(X_train, y_train)
 
-    # Save model & log as W&B artifact
-    model_path = Path("data/06_models/model_baseline.pkl")
-    model_path.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, model_path)
-
-    artifact = wandb.Artifact("model_baseline", type="model")
-    artifact.add_file(str(model_path))
-    run.log_artifact(artifact)
+    wandb.init(
+        project="asi-group-15-01",
+        job_type="train",
+        config=model_params,
+        reinit=True,
+    )
 
     return model
 
@@ -138,8 +129,10 @@ def evaluate(model, X_test: pd.DataFrame, y_test: pd.DataFrame) -> pd.DataFrame:
         "roc_auc": roc_auc_score(y_test, y_proba),
     }
 
-    # send metrics to W&B dashboard
+    artifact = wandb.Artifact("model_baseline", type="model")
+    artifact.add_file(Path("data/06_models/model_baseline.pkl"))
+    wandb.log_artifact(artifact)
+
     wandb.log(metrics)
 
-    metrics_df = pd.DataFrame([metrics])
-    return metrics_df
+    return metrics
