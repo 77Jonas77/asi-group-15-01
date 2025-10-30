@@ -34,8 +34,8 @@ Po wykonaniu pipeline dane i model zapisują się lokalnie w strukturze:
 - dane po czyszczeniu: data/02_interim/
 - dane przygotowane do uczenia modelu: data/03_processed/
 - wytrenowany model: data/06_models/model_baseline.pkl
-- metryki:data/09
+- metryki:data/09_tracking/metrics_baseline.json
 
 
-![Pipline Screens](images/ASI_02_01.png)
-![Pipline Screens](images/ASI_02_02.png)
+![Pipline Screens](images/kedro-pipeline.png)
+
