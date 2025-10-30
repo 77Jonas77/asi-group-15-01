@@ -19,8 +19,9 @@ Jako nasza metryka oceny modelu wybraliśmy **AP** (Average Precision). Decyzja 
 Rozważaliśmy również metrykę AUC-ROC, aczkolwiek jak ustaliliśmy, jej wynik może być łatwo zawyżany przez przewagę w ilości wierszy z klasą negatywną (<$50k).
 
 ## Wandb
+
 Panel projektu w W&B dostępny jest pod adresem:
-https://wandb.ai/s28044-polish-japanese-academy-of-information-technology/asi-group-15-01?nw=nwusers28044
+<https://wandb.ai/s28044-polish-japanese-academy-of-information-technology/asi-group-15-01?nw=nwusers28044>
 
 ## Kedro Quickstart
 
@@ -36,6 +37,6 @@ Po wykonaniu pipeline dane i model zapisują się lokalnie w strukturze:
 - wytrenowany model: data/06_models/model_baseline.pkl
 - metryki:data/09_tracking/metrics_baseline.json
 
+## Kedro Pipeline
 
 ![Pipline Screens](images/kedro-pipeline.png)
-
