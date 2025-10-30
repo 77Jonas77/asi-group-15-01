@@ -43,6 +43,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 inputs=["baseline_model", "X_test", "y_test"],
                 outputs="evaluation_metrics",
                 name="evaluate",
+
             ),
         ]
     )
