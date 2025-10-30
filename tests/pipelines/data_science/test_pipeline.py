@@ -7,3 +7,203 @@ Kedro recommends using `pytest` framework, more info about it can be found
 in the official documentation:
 https://docs.pytest.org/en/latest/getting-started.html
 """
+
+import pandas as pd
+import numpy as np
+import pytest
+
+from src.asi_group_15_01.pipelines.data_science.nodes import (
+    basic_clean,
+    train_test_split,
+)
+
+
+# --- Fixtures for testing ---
+
+
+@pytest.fixture
+def sample_raw_data():
+    """
+    Creates a sample raw DataFrame to simulate input data for testing.
+    """
+
+    data = {
+        "age": [39, 50, 38, 50, 40, 39, 39],
+        "workclass": [
+            "State-gov",
+            "Self-emp-not-inc",
+            "Private",
+            "Private",
+            "?",
+            "Private",
+            "Private",
+        ],
+        "fnlwgt": [77516, 83311, 215646, 215646, 120000, 120000, 120000],
+        "education": [
+            "Bachelors",
+            "Bachelors",
+            "HS-grad",
+            "HS-grad",
+            "Bachelors",
+            "Bachelors",
+            "Bachelors",
+        ],
+        "marital-status": [
+            "Never-married",
+            "Married-civ-spouse",
+            "Divorced",
+            "Married-civ-spouse",
+            "Married-civ-spouse",
+            "Married-civ-spouse",
+            "Married-civ-spouse",
+        ],
+        "occupation": [
+            "Adm-clerical",
+            "Exec-managerial",
+            "Handlers-cleaners",
+            "Handlers-cleaners",
+            "Exec-managerial",
+            "Exec-managerial",
+            "Exec-managerial",
+        ],
+        "relationship": [
+            "Not-in-family",
+            "Husband",
+            "Not-in-family",
+            "Husband",
+            "Husband",
+            "Husband",
+            "Husband",
+        ],
+        "race": ["White", "White", "White", "White", "White", "White", "White"],
+        "sex": ["Male", "Male", "Male", "Male", "Male", "Male", "Male"],
+        "capital-gain": [2174, 0, 0, 0, 0, 0, 0],
+        "capital-loss": [0, 0, 0, 0, 1000, 0, 0],
+        "hours-per-week": [40, 13, 40, 40, 40, 40, 40],
+        "native-country": [
+            "United-States",
+            "United-States",
+            "United-States",
+            "United-States",
+            "United-States",
+            "United-States",
+            "United-States",
+        ],
+        "income": ["<=50K", "<=50K", "<=50K", "<=50K", ">50K", ">50K", ">50K"],
+    }
+    df = pd.DataFrame(data)
+    return df
+
+
+@pytest.fixture
+def split_params():
+    """
+    Sample split parameters for train_test_split function.
+    """
+    return {"test_size": 0.3, "random_state": 42, "stratify": False}
+
+
+class TestDataSciencePipeline:
+
+    # Tests for node: basic_clean
+
+    def test_basic_clean_removes_nans_and_question_marks(self, sample_raw_data):
+        """
+        Tests that basic_clean removes rows with '?'.
+        """
+
+        cleaned_df = basic_clean(sample_raw_data.copy())
+
+        assert (
+            len(cleaned_df) == 5
+        ), "Number of rows after cleaning (duplicates and NaN) is incorrect."
+        assert (
+            not cleaned_df.isnull().any().any()
+        ), "There are still NaN values in the dataframe."
+
+    def test_basic_clean_drops_unnecessary_columns(self, sample_raw_data):
+        """
+        Tests that basic_clean drops 'fnlwgt' and 'education' columns.
+        """
+
+        cleaned_df = basic_clean(sample_raw_data.copy())
+
+        assert "fnlwgt" not in cleaned_df.columns, "Column 'fnlwgt' was not removed."
+        assert (
+            "education" not in cleaned_df.columns
+        ), "Column 'education' was not removed."
+
+    def test_basic_clean_performs_target_encoding(self, sample_raw_data):
+        """
+        Tests that the target column is encoded and the original is removed.
+        """
+
+        cleaned_df = basic_clean(sample_raw_data.copy())
+
+        assert (
+            "income_encoded" in cleaned_df.columns
+        ), "Column 'income_encoded' is missing."
+        assert (
+            "income" not in cleaned_df.columns
+        ), "Original target column 'income' was not removed."
+        assert (
+            cleaned_df["income_encoded"].dtype == np.int64
+            or cleaned_df["income_encoded"].dtype == np.uint8
+        ), "Column 'income_encoded' should be numeric."
+
+    def test_basic_clean_performs_log_transformation(self, sample_raw_data):
+        """
+        Tests that 'capital-gain' and 'capital-loss' columns are log-transformed and originals are removed.
+        """
+        cleaned_df = basic_clean(sample_raw_data.copy())
+
+        assert (
+            "capital-gain-log" in cleaned_df.columns
+        ), "Column 'capital-gain-log' is missing."
+        assert (
+            "capital-loss-log" in cleaned_df.columns
+        ), "Column 'capital-loss-log' is missing."
+        assert (
+            "capital-gain" not in cleaned_df.columns
+        ), "Original column 'capital-gain' was not removed."
+        assert (
+            "capital-loss" not in cleaned_df.columns
+        ), "Original column 'capital-loss' was not removed."
+
+    # Tests for node: train_test_split
+
+    def test_train_test_split_sizes(self, sample_raw_data, split_params):
+        """
+        Tests that train/test split maintains the proportions from 'test_size'.
+        """
+
+        df_clean = basic_clean(sample_raw_data.copy())
+
+        X_train, X_test, y_train, y_test = train_test_split(df_clean, split_params)
+
+        assert len(X_train) == 3, "Size of X_train is incorrect."
+        assert len(X_test) == 2, "Size of X_test is incorrect."
+        assert len(y_train) == 3, "Size of y_train is incorrect."
+        assert len(y_test) == 2, "Size of y_test is incorrect."
+
+    def test_train_test_split_no_target_leakage(self, sample_raw_data, split_params):
+        """
+        Tests that the target column has been removed from feature sets (X_train, X_test).
+        """
+
+        df_clean = basic_clean(sample_raw_data.copy())
+
+        X_train, X_test, y_train, y_test = train_test_split(df_clean, split_params)
+
+        assert (
+            "income_encoded" not in X_train.columns
+        ), "Target leakage occurred in X_train."
+        assert (
+            "income_encoded" not in X_test.columns
+        ), "Target leakage occurred in X_test."
+        assert (
+            "income_encoded" in y_train.columns
+        ), "y_train does not contain the target column."
+        assert (
+            "income_encoded" in y_test.columns
+        ), "y_test does not contain the target column."
