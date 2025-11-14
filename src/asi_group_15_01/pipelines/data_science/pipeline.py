@@ -4,7 +4,8 @@ generated using Kedro 1.0.0
 """
 
 from kedro.pipeline import Node, Pipeline
-from .nodes import load_raw, basic_clean, train_test_split, train_baseline, evaluate
+from .nodes import load_raw, basic_clean, train_test_split, train_baseline, evaluate, train_autogluon, \
+    evaluate_autogluon, save_best_model
 
 
 def create_pipeline(**kwargs) -> Pipeline:
@@ -44,6 +45,24 @@ def create_pipeline(**kwargs) -> Pipeline:
                 inputs=["model_baseline", "X_test", "y_test"],
                 outputs="metrics_baseline",
                 name="evaluate",
+            ),
+            Node(
+                func=train_autogluon,
+                inputs=["X_train", "y_train", "params:autogluon", "params:seed"],
+                outputs="ag_predictor",
+                name="train_autogluon",
+            ),
+            Node(
+                func=evaluate_autogluon,
+                inputs=["ag_predictor", "X_test", "y_test"],
+                outputs="ag_metrics",
+                name="evaluate_autogluon",
+            ),
+            Node(
+                func=save_best_model,
+                inputs="ag_predictor",
+                outputs="ag_model",
+                name="save_best_model",
             ),
         ]
     )
