@@ -24,5 +24,6 @@ dependencies:
       - notebook
       - kedro-datasets
       - kedro-viz
+      - autogluon==1.*
 
   - pyyaml
