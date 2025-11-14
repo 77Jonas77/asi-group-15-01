@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import wandb
+import random
+import torch
 from pathlib import Path
 
 from autogluon.tabular import TabularPredictor
@@ -142,12 +144,19 @@ def train_autogluon(
     X_train: pd.DataFrame, y_train: pd.DataFrame, params: dict, seed: int
 ):
 
-    import random
-    import torch
-
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+
+    if wandb.run is not None:
+        wandb.finish()
+
+    wandb.init(
+        project="asi-group-15-01",
+        job_type="ag-train",
+        config={**params, "seed": seed},
+        reinit=True,
+    )
 
     train_df = X_train.copy()
     label_col = params["label"]
@@ -157,10 +166,15 @@ def train_autogluon(
         label=label_col,
         problem_type=params["problem_type"],
         eval_metric=params["eval_metric"],
-        path="data/06_models/ag_tmp",
+        path=params.get("model_path", "data/06_models/ag_tmp"),
     ).fit(
         train_data=train_df, time_limit=params["time_limit"], presets=params["presets"]
     )
+
+    fit_summary = predictor.fit_summary()
+    train_time = fit_summary.get("train_time", 0)
+
+    wandb.log({"train_time_s": train_time})
 
     return predictor
 
@@ -171,15 +185,23 @@ def evaluate_autogluon(predictor, X_test: pd.DataFrame, y_test: pd.DataFrame):
     test_df[predictor.label] = y_test.values
 
     leaderboard = predictor.leaderboard(test_df, silent=True)
-    perf = predictor.evaluate(test_df)
+    perf = predictor.evaluate(test_df, silent=True)
+
+    wandb.log(
+        {
+            "roc_auc": perf.get("roc_auc", perf.get("eval_metric", 0)),
+        }
+    )
 
     return {"leaderboard": leaderboard.to_dict(), "performance": perf}
 
 
-def save_best_model(predictor, output_path="data/06_models/ag_production.pkl"):
-    import pickle
+def save_best_model(predictor):
 
-    with open(output_path, "wb") as f:
-        pickle.dump(predictor, f)
+    artifact = wandb.Artifact("ag_model", type="model")
+    artifact.add_file("data/06_models/ag_production.pkl")
+    wandb.log_artifact(artifact, aliases=["candidate", "latest"])
+
+    wandb.finish()
 
     return predictor
