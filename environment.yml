@@ -3,13 +3,14 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.11
+  - python=3.10
   - jupyterlab
   - ipykernel
   - numpy
   - pandas
   - scikit-learn
   - matplotlib
+  - pyyaml
   - pip
   - pip:
       - pre-commit
@@ -24,6 +25,4 @@ dependencies:
       - notebook
       - kedro-datasets
       - kedro-viz
-      - autogluon==1.*
-
-  - pyyaml
+      - autogluon==1.1.0
