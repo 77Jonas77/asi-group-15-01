@@ -4,8 +4,16 @@ generated using Kedro 1.0.0
 """
 
 from kedro.pipeline import Node, Pipeline
-from .nodes import load_raw, basic_clean, train_test_split, train_baseline, evaluate, train_autogluon, \
-    evaluate_autogluon, save_best_model
+from .nodes import (
+    load_raw,
+    basic_clean,
+    train_test_split,
+    train_baseline,
+    evaluate,
+    train_autogluon,
+    evaluate_autogluon,
+    save_best_model,
+)
 
 
 def create_pipeline(**kwargs) -> Pipeline:

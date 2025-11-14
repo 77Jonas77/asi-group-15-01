@@ -138,8 +138,9 @@ def evaluate(model, X_test: pd.DataFrame, y_test: pd.DataFrame) -> pd.DataFrame:
     return metrics
 
 
-def train_autogluon(X_train: pd.DataFrame, y_train: pd.DataFrame,
-                    params: dict, seed: int):
+def train_autogluon(
+    X_train: pd.DataFrame, y_train: pd.DataFrame, params: dict, seed: int
+):
 
     import random
     import torch
@@ -148,21 +149,17 @@ def train_autogluon(X_train: pd.DataFrame, y_train: pd.DataFrame,
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-
     train_df = X_train.copy()
     label_col = params["label"]
     train_df[label_col] = y_train.values
-
 
     predictor = TabularPredictor(
         label=label_col,
         problem_type=params["problem_type"],
         eval_metric=params["eval_metric"],
-        path="data/06_models/ag_tmp"
+        path="data/06_models/ag_tmp",
     ).fit(
-        train_data=train_df,
-        time_limit=params["time_limit"],
-        presets=params["presets"]
+        train_data=train_df, time_limit=params["time_limit"], presets=params["presets"]
     )
 
     return predictor
@@ -173,20 +170,16 @@ def evaluate_autogluon(predictor, X_test: pd.DataFrame, y_test: pd.DataFrame):
     test_df = X_test.copy()
     test_df[predictor.label] = y_test.values
 
-
     leaderboard = predictor.leaderboard(test_df, silent=True)
     perf = predictor.evaluate(test_df)
 
-    return {
-        "leaderboard": leaderboard.to_dict(),
-        "performance": perf
-    }
+    return {"leaderboard": leaderboard.to_dict(), "performance": perf}
 
 
 def save_best_model(predictor, output_path="data/06_models/ag_production.pkl"):
     import pickle
 
-    with open(output_path, 'wb') as f:
+    with open(output_path, "wb") as f:
         pickle.dump(predictor, f)
 
     return predictor
